@@ -38,6 +38,24 @@ object RecFun extends RecFunInterface {
    * Exercise 3
    */
   def countChange(money: Int, coins: List[Int]): Int = {
-    0
+    def f(money: Int, coins: List[Int], acc: Int): Int =
+      if (coins.isEmpty) acc
+      else
+        if (money % coins.head == 0) f(money, coins.tail, acc + 1)
+        else f(money, coins.tail, acc)
+    def g(money: Int, coins: List[Int], n: Int, acc: Int): Int =
+      if (money <= 0) acc
+      else {
+        val money_updated = money - coins.head * n
+        val acc_f = f(money_updated, coins.tail, 0)
+        g(money_updated, coins, n + 1, acc + acc_f)
+      }
+    def h(money: Int, coins: List[Int], acc: Int): Int =
+      if (coins.isEmpty) acc
+      else {
+        val acc_g = g(money, coins, 1, if (money % coins.head == 0) 1 else 0)
+        h(money, coins.tail, acc + acc_g)
+      }
+    h(money, coins, 0)
   }
 }
