@@ -79,7 +79,7 @@ abstract class TweetSet extends TweetSetInterface {
    * Question: Should we implment this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-  def descendingByRetweet: TweetList = Nil
+  def descendingByRetweet: TweetList
 
   /**
    * The following methods are already implemented
@@ -114,6 +114,8 @@ class Empty extends TweetSet {
 
   def isEmpty: Boolean = true
   def mostRetweeted = throw new java.util.NoSuchElementException("EmptyTree")
+
+  def descendingByRetweet: TweetList = Nil
   /**
    * The following methods are already implemented
    */
@@ -145,6 +147,10 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
     }
   }
 
+  def descendingByRetweet: TweetList = {
+    val head = this.mostRetweeted
+    new Cons(head, this.remove(head).descendingByRetweet)
+  }
   /**
    * The following methods are already implemented
    */
@@ -194,21 +200,21 @@ class Cons(val head: Tweet, val tail: TweetList) extends TweetList {
 }
 
 
-// object GoogleVsApple {
-//   val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
-//   val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
+object GoogleVsApple {
+  val google = List("android", "Android", "galaxy", "Galaxy", "nexus", "Nexus")
+  val apple = List("ios", "iOS", "iphone", "iPhone", "ipad", "iPad")
 
-//   lazy val googleTweets: TweetSet = ???
-//   lazy val appleTweets: TweetSet = ???
+  lazy val googleTweets: TweetSet = ???
+  lazy val appleTweets: TweetSet = ???
 
-//   /**
-//    * A list of all tweets mentioning a keyword from either apple or google,
-//    * sorted by the number of retweets.
-//    */
-//   lazy val trending: TweetList = ???
-// }
+  /**
+   * A list of all tweets mentioning a keyword from either apple or google,
+   * sorted by the number of retweets.
+   */
+  lazy val trending: TweetList = ???
+}
 
-// object Main extends App {
-//   // Print the trending tweets
-//   GoogleVsApple.trending foreach println
-// }
+object Main extends App {
+  // Print the trending tweets
+  GoogleVsApple.trending foreach println
+}
