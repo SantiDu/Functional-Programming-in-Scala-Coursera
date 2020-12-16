@@ -158,7 +158,15 @@ trait Huffman extends HuffmanInterface {
    * This function decodes the bit sequence `bits` using the code tree `tree` and returns
    * the resulting list of characters.
    */
-  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = ???
+  def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
+    def goTree(curr_tree: CodeTree, bits: List[Bit], acc: List[Char]): List[Char] = {
+        curr_tree match {
+          case Leaf(c, _) => if (bits == Nil) c::acc else goTree(tree, bits, c::acc)
+          case Fork(left, right, _, _) => if (bits.head == 0) goTree(left, bits.tail, acc) else goTree(right, bits.tail, acc)
+        }
+      }
+    goTree(tree, bits, Nil)
+  }
 
   /**
    * A Huffman coding tree for the French language.
@@ -176,7 +184,7 @@ trait Huffman extends HuffmanInterface {
   /**
    * Write a function that returns the decoded secret
    */
-  def decodedSecret: List[Char] = ???
+  def decodedSecret: List[Char] = decode(frenchCode, secret)
 
 
   // Part 4a: Encoding using Huffman tree
@@ -185,7 +193,16 @@ trait Huffman extends HuffmanInterface {
    * This function encodes `text` using the code tree `tree`
    * into a sequence of bits.
    */
-  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = ???
+  def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
+    def goTree(curr_tree: CodeTree, text: List[Char], acc: List[Bit]): List[Bit] = {
+      if (text == Nil) acc
+      else curr_tree match {
+        case Fork(left, right, _, _) => if (chars(left).contains(text.head)) goTree(left, text, 0::acc) else goTree(right, text, 1::acc)
+        case Leaf(_, _) => goTree(tree, text.tail, acc)
+      }
+    }
+    goTree(tree, text, Nil)
+  }
 
   // Part 4b: Encoding using code table
 
