@@ -21,9 +21,13 @@ case class Leaf(char: Char, weight: Int) extends CodeTree
 trait Huffman extends HuffmanInterface {
 
   // Part 1: Basics
-  def weight(tree: CodeTree): Int = ??? // tree match ...
+  def weight(tree: CodeTree): Int = tree match {
+    case Fork(_, _, _, weight) => weight
+  }
 
-  def chars(tree: CodeTree): List[Char] = ??? // tree match ...
+  def chars(tree: CodeTree): List[Char] = tree match {
+    case Fork(_, _, chars, _) => chars
+  }
 
   def makeCodeTree(left: CodeTree, right: CodeTree) =
     Fork(left, right, chars(left) ::: chars(right), weight(left) + weight(right))
@@ -64,7 +68,15 @@ trait Huffman extends HuffmanInterface {
    *       println("integer is  : "+ theInt)
    *   }
    */
-  def times(chars: List[Char]): List[(Char, Int)] = ???
+  def times(chars: List[Char]): List[(Char, Int)] = {
+    def fillList(chars: List[Char], curr_head: Char, occ: Int, acc: List[(Char, Int)]): List[(Char, Int)] = {
+      if (chars == Nil) (curr_head, occ)::acc
+      else
+        if (chars.head != curr_head) fillList(chars, chars.head, 0, (curr_head, occ)::acc)
+        else fillList(chars.tail, curr_head, occ + 1, acc)
+    }
+    fillList(chars.sorted, chars.head, 0, Nil)
+  }
 
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
