@@ -169,7 +169,7 @@ trait Huffman extends HuffmanInterface {
           case Fork(left, right, _, _) => if (bits.head == 0) goTree(left, bits.tail, acc) else goTree(right, bits.tail, acc)
         }
       }
-    goTree(tree, bits, Nil)
+    goTree(tree, bits, Nil).reverse
   }
 
   /**
@@ -205,7 +205,7 @@ trait Huffman extends HuffmanInterface {
         case Leaf(_, _) => goTree(tree, text.tail, acc)
       }
     }
-    goTree(tree, text, Nil)
+    goTree(tree, text, Nil).reverse
   }
 
   // Part 4b: Encoding using code table
