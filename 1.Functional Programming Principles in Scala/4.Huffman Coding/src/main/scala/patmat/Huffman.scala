@@ -23,10 +23,12 @@ trait Huffman extends HuffmanInterface {
   // Part 1: Basics
   def weight(tree: CodeTree): Int = tree match {
     case Fork(_, _, _, weight) => weight
+    case Leaf(_, weight) => weight
   }
 
   def chars(tree: CodeTree): List[Char] = tree match {
     case Fork(_, _, chars, _) => chars
+    case Leaf(char, _) => char::Nil
   }
 
   def makeCodeTree(left: CodeTree, right: CodeTree) =
@@ -75,7 +77,7 @@ trait Huffman extends HuffmanInterface {
         if (chars.head != curr_head) fillList(chars, chars.head, 0, (curr_head, occ)::acc)
         else fillList(chars.tail, curr_head, occ + 1, acc)
     }
-    fillList(chars.sorted, chars.head, 0, Nil)
+    fillList(chars, chars.head, 0, Nil)
   }
 
   /**
@@ -85,12 +87,21 @@ trait Huffman extends HuffmanInterface {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = ???
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = {
+    def go(chars: List[(Char, Int)], acc: List[Leaf]): List[Leaf] = {
+      if (chars == Nil) acc
+      else go(chars.tail, Leaf(chars.head._1, chars.head._2)::acc)
+    }
+    go(freqs.sortBy(-_._2), Nil)
+  }
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = ???
+  def singleton(trees: List[CodeTree]): Boolean = trees match {
+    case t::Nil => true
+    case _ => false
+  }
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -104,7 +115,16 @@ trait Huffman extends HuffmanInterface {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def combine(trees: List[CodeTree]): List[CodeTree] = ???
+  def insert(tree: CodeTree, trees: List[CodeTree]): List[CodeTree] = trees match {
+    case Nil => tree::Nil
+    case t::ts => if (weight(tree) <= weight(t)) tree::trees else t::insert(tree, ts)
+  }
+  def combine(trees: List[CodeTree]): List[CodeTree] = {
+    trees match {
+      case t1::t2::restTs => insert(makeCodeTree(t1, t2), restTs)
+      case _ => trees
+    }
+  }
 
   /**
    * This function will be called in the following way:
@@ -117,7 +137,9 @@ trait Huffman extends HuffmanInterface {
    * In such an invocation, `until` should call the two functions until the list of
    * code trees contains only one single tree, and then return that singleton list.
    */
-  def until(done: List[CodeTree] => Boolean, merge: List[CodeTree] => List[CodeTree])(trees: List[CodeTree]): List[CodeTree] = ???
+  def until(done: List[CodeTree] => Boolean, merge: List[CodeTree] => List[CodeTree])(trees: List[CodeTree]): List[CodeTree] =
+    if (done(trees)) trees
+    else until(done, merge)(merge(trees))
 
   /**
    * This function creates a code tree which is optimal to encode the text `chars`.
@@ -125,7 +147,7 @@ trait Huffman extends HuffmanInterface {
    * The parameter `chars` is an arbitrary text. This function extracts the character
    * frequencies from that text and creates a code tree based on them.
    */
-  def createCodeTree(chars: List[Char]): CodeTree = ???
+  def createCodeTree(chars: List[Char]): CodeTree = until(singleton, combine)(makeOrderedLeafList(times(chars)))(0)
 
 
   // Part 3: Decoding
