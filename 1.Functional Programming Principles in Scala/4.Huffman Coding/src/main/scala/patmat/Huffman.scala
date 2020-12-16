@@ -77,7 +77,11 @@ trait Huffman extends HuffmanInterface {
         if (chars.head != curr_head) fillList(chars, chars.head, 0, (curr_head, occ)::acc)
         else fillList(chars.tail, curr_head, occ + 1, acc)
     }
-    fillList(chars, chars.head, 0, Nil)
+    if (chars == Nil) Nil
+    else {
+      val charsSorted = chars.sorted
+      fillList(charsSorted, charsSorted.head, 0, Nil)
+    }
   }
 
   /**
