@@ -33,7 +33,7 @@ object Anagrams extends AnagramsInterface {
    *
    *  Note: you must use `groupBy` to implement this method!
    */
-  def wordOccurrences(w: Word): Occurrences = (w.toLowerCase().toList groupBy (x => x) map {case (k, v) => (k, v.length)}).toList.sortBy(_._1)
+  def wordOccurrences(w: Word): Occurrences = (w.toLowerCase().toSeq groupBy (x => x) map {case (k, v) => (k, v.length)}).toList.sortBy(_._1)
 
   /** Converts a sentence into its character occurrence list. */
   def sentenceOccurrences(s: Sentence): Occurrences = wordOccurrences(s mkString "")
@@ -80,8 +80,14 @@ object Anagrams extends AnagramsInterface {
    *  Note that the order of the occurrence list subsets does not matter -- the subsets
    *  in the example above could have been displayed in some other order.
    */
-  def combinations(occurrences: Occurrences): List[Occurrences] = ???
-  // for (n <- 0 until l.length) 
+  def combinations(occurrences: Occurrences): List[Occurrences] = {
+    val nodesByLayer = occurrences.map{case (char, freq) => for (subfreq <- 0 to freq) yield (char, subfreq)}.reverse
+    def op(l1: List[Occurrences], l2: Seq[(Char, Int)]): List[Occurrences] = {
+      for (occSubset <- l1; occSubsetElem <- l2) yield if (occSubsetElem._2 != 0) occSubsetElem::occSubset else occSubset
+    }
+    def foldLeftCompilerHelper(emptyOccurrenceSet: List[Occurrences]): List[Occurrences] = nodesByLayer.foldLeft(emptyOccurrenceSet)(op(_, _))
+    foldLeftCompilerHelper(Nil::Nil)
+  }
 
   /** Subtracts occurrence list `y` from occurrence list `x`.
    *
