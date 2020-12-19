@@ -99,7 +99,14 @@ object Anagrams extends AnagramsInterface {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = ???
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = {
+    def op(occMap: Map[Char, Int], freq: (Char, Int)): Map[Char, Int] = {
+      val diff = occMap(freq._1) - freq._2
+      if (diff == 0) occMap.removed(freq._1)
+      else occMap.updated(freq._1, diff)
+    }
+    y.foldLeft(x.toMap)(op(_, _)).toList.sortBy(_._1)
+  }
 
   /** Returns a list of all anagram sentences of the given sentence.
    *
